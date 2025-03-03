@@ -1,23 +1,19 @@
-import { Controller, Get } from '@nestjs/common';
-import { AppService } from './app.service';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
-import { User } from './user.entity';
+import { Controller } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
+import { AppService } from './app.service';
+import { User } from './user.entity';
 
-@ApiTags('Users')
-@Controller()export class AppController {
-  constructor(private readonly appService: AppService) {}
-  
-  // @Get()
-  // @ApiOperation({ summary: 'Lista todos os usuários' })
-  // @ApiResponse({ status: 200, description: 'Lista de usuários', type: [User] })
-  // async getAllUsers(): Promise<User[]> {
-  //   return this.appService.getAllUsers();
-  // }
+@Controller()
+export class AppController {
+  constructor(private readonly userService: AppService) {}
 
   @MessagePattern('get_all_users')
-  async handleGetAllUsers() {
-    return this.appService.getAllUsers();
+  async handleGetAllUsers(): Promise<User[]> {
+    return this.userService.getAllUsers();
   }
 
+  @MessagePattern('create_user')
+  async handleCreateUser(data: { username: string; password: string }): Promise<User> {
+    return this.userService.createUser(data);
+  }
 }

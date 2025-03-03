@@ -2,20 +2,23 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
+import { MessagePattern } from '@nestjs/microservices';
 
 @Injectable()
 export class AppService {
   constructor(
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    private userRepository: Repository<User>,
   ) {}
 
-  /**
-   * Retorna todos os usuários cadastrados no sistema.
-   * @returns Lista de usuários.
-   */
+  @MessagePattern('get_all_users')
   async getAllUsers(): Promise<User[]> {
-    return await this.userRepository.find();
+    return this.userRepository.find();
+  }
+
+  @MessagePattern('create_user')
+  async createUser(data: { username: string; password: string }): Promise<User> {
+    const newUser = this.userRepository.create(data);
+    return this.userRepository.save(newUser);
   }
 }
-
