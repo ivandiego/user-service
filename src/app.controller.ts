@@ -16,4 +16,9 @@ export class AppController {
   async handleCreateUser(data: { username: string; password: string }): Promise<User> {
     return this.userService.createUser(data);
   }
+
+  @MessagePattern('validate_user')
+  async validateUser(data: { username: string; password: string }) {
+    return this.userService.validateUser(data.username, data.password);
+  }
 }

@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { MessagePattern } from '@nestjs/microservices';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class AppService {
@@ -11,14 +12,35 @@ export class AppService {
     private userRepository: Repository<User>,
   ) {}
 
-  @MessagePattern('get_all_users')
   async getAllUsers(): Promise<User[]> {
     return this.userRepository.find();
   }
 
-  @MessagePattern('create_user')
   async createUser(data: { username: string; password: string }): Promise<User> {
-    const newUser = this.userRepository.create(data);
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+    const newUser = this.userRepository.create({ username: data.username, password: hashedPassword });
     return this.userRepository.save(newUser);
   }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const user = await this.userRepository.findOne({ where: { username } });
+    return user ?? undefined;  
+  }
+
+  async validateUser(username: string, password: string): Promise<User | null> {
+    const user = await this.userRepository.findOne({ where: { username } });
+    
+    if (!user) {
+      return null;
+    }
+  
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    
+    if (!isPasswordValid) {
+      return null;
+    }
+  
+    return user;
+  }
+  
 }
