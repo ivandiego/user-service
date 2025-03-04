@@ -2,6 +2,7 @@ import { Controller } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 import { AppService } from './app.service';
 import { User } from './user.entity';
+import { Role } from './user.entity';
 
 @Controller()
 export class AppController {
@@ -13,12 +14,22 @@ export class AppController {
   }
 
   @MessagePattern('create_user')
-  async handleCreateUser(data: { username: string; password: string }): Promise<User> {
+  async handleCreateUser(data: { username: string; password: string; role: Role }): Promise<User> {
     return this.userService.createUser(data);
   }
 
   @MessagePattern('validate_user')
-  async validateUser(data: { username: string; password: string }) {
-    return this.userService.validateUser(data.username, data.password);
+  async handleValidateUser(data: { username: string; password: string }): Promise<User | null> {
+    const user = await this.userService.validateUser(data.username, data.password);
+
+    return user;
   }
-}
+  @MessagePattern('get_user_by_username')
+  async getUserByUsername(data: { username: string }): Promise<User | null> {
+    const { username } = data;
+
+    console.log(username + ' get_user_by_username ');
+    return this.userService.getUserByUsername(username);  
+  }
+}   
+
