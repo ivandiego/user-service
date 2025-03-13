@@ -24,6 +24,7 @@ export class AppController {
 
     return user;
   }
+  
   @MessagePattern('get_user_by_username')
   async getUserByUsername(data: { username: string }): Promise<User | null> {
     const { username } = data;
