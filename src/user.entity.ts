@@ -9,7 +9,7 @@ export enum Role {
 
 @Entity()
 export class User {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid') // 🔥 Agora usa UUID para consistência
   @ApiProperty({ example: 1, description: 'ID único do usuário' })
   id: number;
 

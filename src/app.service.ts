@@ -20,8 +20,12 @@ export class AppService {
   async createUser(data: { username: string; password: string, role: Role}): Promise<User> {
     const hashedPassword = await bcrypt.hash(data.password, 10);
     const newUser = this.userRepository.create({ username: data.username, password: hashedPassword, role: data.role });
-    return this.userRepository.save(newUser);
-  }
+    const savedUser = await this.userRepository.save(newUser);
+
+    // 🔥 Remover a senha do retorno para segurança
+    const { password, ...userWithoutPassword } = savedUser;
+    return userWithoutPassword as User;
+    }
 
   async getUserByUsername(username: string): Promise<User | null> {
     const user = await this.userRepository.findOne({ where: { username } });
